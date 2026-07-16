@@ -3,7 +3,7 @@
 Production: **https://gamersunite.us** on a home Kubernetes cluster.
 
 Pipeline: push to `main` → GitHub Actions builds the image and publishes
-`ghcr.io/kyle678/gamersunite:latest` (plus a `sha-<commit>` tag for rollbacks)
+`ghcr.io/kyle678-labs/gamersunite:latest` (plus a `sha-<commit>` tag for rollbacks)
 → the workflow POSTs to your Keel webhook → Keel force-recreates the pod,
 which pulls the fresh `:latest`.
 
@@ -27,7 +27,7 @@ PersistentVolumeClaim, exposed via NodePort **30080**. On boot it runs
 
 2. After the first workflow run creates the package, make it pullable by the
    cluster — either set the `gamersunite` package to **public**
-   (github.com/kyle678?tab=packages → package → Package settings → Change
+   (github.com/orgs/kyle678-labs/packages → package → Package settings → Change
    visibility), or keep it private and create the `ghcr-pull` secret +
    uncomment `imagePullSecrets` in `k8s/deployment.yaml`.
 
@@ -53,7 +53,7 @@ curl -I http://localhost:30080    # expect 200
 `file:/data/gamersunite.db` on the persistent volume.
 
 Keel: the Deployment carries `keel.sh/policy: force` + `keel.sh/match-tag: "true"`
-labels, so the native webhook (`{"name": "ghcr.io/kyle678/gamersunite",
+labels, so the native webhook (`{"name": "ghcr.io/kyle678-labs/gamersunite",
 "tag": "latest"}`) triggers the update. Make sure Keel's native webhook
 receiver is enabled and reachable at the URL you stored in the secret.
 
@@ -76,7 +76,7 @@ Watch it: `gh run watch`, then `kubectl get pods -w` on the server.
 
 ```sh
 # Roll back to a previous commit's image:
-kubectl set image deploy/gamersunite web=ghcr.io/kyle678/gamersunite:sha-<full-commit-sha>
+kubectl set image deploy/gamersunite web=ghcr.io/kyle678-labs/gamersunite:sha-<full-commit-sha>
 # (roll forward again by re-setting :latest)
 
 # Re-seed the game catalog after editing prisma/seed.ts or adding covers
