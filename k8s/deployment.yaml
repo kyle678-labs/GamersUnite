@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: ghcr.io/kyle678/gamersunite:latest
+          image: ghcr.io/kyle678-labs/gamersunite:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
