@@ -217,9 +217,11 @@ async function main() {
   }
   console.log(`  ✔ ${channels.length} pool voice channels${botMode ? " (bot creates party channels on demand)" : ""}`);
 
-  // --- Demo users + demo lobbies (only on first run) ---
+  // --- Demo users + demo lobbies (only on first run, never in production) ---
   const existing = await prisma.user.count();
-  if (existing === 0) {
+  if (process.env.NODE_ENV === "production") {
+    console.log("  ↷ production - skipping demo data");
+  } else if (existing === 0) {
     const passwordHash = await bcrypt.hash("demo1234", 10);
     const users: { id: string }[] = [];
     for (const u of DEMO_USERS) {
