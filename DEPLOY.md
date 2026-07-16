@@ -41,6 +41,12 @@ Developer portal → app `1525078189830045716` → OAuth2 → Redirects → add
 Copy `.env.production` to the server privately (it holds the bot token and
 OAuth secret; it is gitignored and must never be committed), then:
 
+> **Format warning:** `kubectl --from-env-file` takes values *literally* — no
+> quote-stripping like dotenv does. Lines must be plain `KEY=value` with **no
+> surrounding quotes**, no UTF-8 BOM, and LF line endings, or every value
+> (APP_URL, bot token, …) silently gains stray characters and Discord returns
+> errors like "Invalid Form Body".
+
 ```sh
 kubectl create secret generic gamersunite-env --from-env-file=.env.production
 kubectl apply -f k8s/
