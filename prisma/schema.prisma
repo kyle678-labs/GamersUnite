@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  username     String        @unique
+  displayName  String
+  passwordHash String?
+  discordId    String?       @unique
+  createdAt    DateTime      @default(now())
+  isModerator  Boolean       @default(false)
+  bannedAt     DateTime? // set when banned by a moderator; blocks login & actions
+  banReason    String?
+  sessions     Session[]
+  memberships  LobbyMember[]
+  hostedLobbies Lobby[]
+  blocksMade    Block[]  @relation("blocker")
+  blocksAgainst Block[]  @relation("blocked")
+  reportsMade     Report[] @relation("reporter")
+  reportsAgainst  Report[] @relation("reported")
+  reportsResolved Report[] @relation("resolver")
+}
+
+// A one-way block. Filtering treats blocks as symmetric (see lib/social.ts):
+// if either party blocked the other, they become mutually invisible.
+model Block {
+  id        String   @id @default(cuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  blocker   User     @relation("blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked   User     @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  reporterId String
+  reportedId String
+  lobbyId    String? // party the report relates to, if any (kept even if lobby is deleted)
+  reason     String // toxic | cheating | scam | name | other
+  details    String?
+  status     String   @default("open") // open | reviewed | actioned
+  createdAt  DateTime @default(now())
+  resolvedAt DateTime?
+  resolvedById String?
+  reporter   User     @relation("reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported   User     @relation("reported", fields: [reportedId], references: [id], onDelete: Cascade)
+  resolvedBy User?    @relation("resolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([reportedId])
+  @@index([status])
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Game {
+  id         String     @id @default(cuid())
+  slug       String     @unique
+  name       String
+  blurb      String?
+  emoji      String     @default("🎮")
+  colorA     String     @default("#ffd6e8")
+  colorB     String     @default("#d6e0ff")
+  coverUrl   String?
+  maxPlayers Int        @default(4)
+  whyLfg     String?
+  source     String     @default("seed")
+  sourceId   String?
+  modes      GameMode[]
+  lobbies    Lobby[]
+}
+
+model GameMode {
+  id     String @id @default(cuid())
+  gameId String
+  name   String
+  source String @default("community")
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([gameId, name])
+}
+
+model Lobby {
+  id           String        @id @default(cuid())
+  gameId       String
+  hostId       String
+  mode         String?
+  platform     String?
+  region       String?
+  skillLevel   String?
+  micRequired  Boolean       @default(false)
+  size         Int // maximum party size (cap)
+  minSize      Int           @default(2) // voice channel opens at this many players
+  note         String?
+  status       String        @default("open") // open | live | full | closed
+  createdAt    DateTime      @default(now())
+  expiresAt    DateTime
+  game         Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  host         User          @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  members      LobbyMember[]
+  voiceChannel VoiceChannel?
+}
+
+model LobbyMember {
+  id       String   @id @default(cuid())
+  lobbyId  String
+  userId   String
+  joinedAt DateTime @default(now())
+  lobby    Lobby    @relation(fields: [lobbyId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([lobbyId, userId])
+}
+
+model VoiceChannel {
+  id            String   @id // Discord voice channel ID
+  name          String
+  lobbyId       String?  @unique
+  managed       Boolean  @default(false) // true = created by our bot per-party, deleted when the party ends
+  textChannelId String? // paired members-only text channel (managed parties only), deleted with the voice channel
+  createdAt     DateTime @default(now()) // managed channels are reaped after VOICE_TTL_HOURS
+  lobby         Lobby?   @relation(fields: [lobbyId], references: [id], onDelete: SetNull)
+}

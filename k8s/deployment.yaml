@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gamersunite
+  labels:
+    app: gamersunite
+    keel.sh/policy: force
+    keel.sh/match-tag: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gamersunite
+  template:
+    metadata:
+      labels:
+        app: gamersunite
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/kyle678/gamersunite:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: gamersunite-env
+          env:
+            - name: DATABASE_URL
+              value: "file:/data/gamersunite.db"
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: gamersunite-data

@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-baloo), var(--font-nunito), ui-sans-serif, sans-serif;
+}
+
+body {
+  background:
+    radial-gradient(60rem 40rem at 110% -10%, #e3f4ff 0%, transparent 60%),
+    radial-gradient(50rem 35rem at -20% 20%, #ffe9f5 0%, transparent 55%),
+    radial-gradient(45rem 45rem at 50% 120%, #e9fff4 0%, transparent 60%),
+    #fdf7ff;
+  min-height: 100vh;
+  color: #443a5e;
+}
+
+.dark body {
+  background:
+    radial-gradient(60rem 40rem at 110% -10%, #1b2947 0%, transparent 60%),
+    radial-gradient(50rem 35rem at -20% 20%, #3a1c3f 0%, transparent 55%),
+    radial-gradient(45rem 45rem at 50% 120%, #122f36 0%, transparent 60%),
+    #151021;
+  color: #d9d2ec;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-baloo), var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer components {
+  .bubble-card {
+    @apply rounded-3xl border-2 border-white bg-white/80 shadow-lg shadow-purple-200/40 backdrop-blur dark:border-white/10 dark:bg-[#221a3a]/80 dark:shadow-black/40;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 px-6 py-3 font-extrabold text-white shadow-lg shadow-pink-200 transition hover:scale-105 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-purple-200 bg-white px-5 py-2.5 font-extrabold text-purple-500 transition hover:scale-105 hover:border-purple-300 active:scale-95 disabled:opacity-50 dark:border-purple-300/25 dark:bg-white/10 dark:text-purple-200 dark:hover:border-purple-300/50;
+  }
+  .btn-discord {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-[#5865F2] px-6 py-3 font-extrabold text-white shadow-lg shadow-indigo-200 transition hover:scale-105 hover:bg-[#4752c4] active:scale-95;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-bold;
+  }
+  .input {
+    @apply w-full rounded-2xl border-2 border-purple-100 bg-white px-4 py-3 font-semibold text-slate-700 outline-none transition placeholder:font-normal placeholder:text-slate-300 focus:border-pink-300 dark:border-purple-300/20 dark:bg-[#181226] dark:text-purple-100 dark:placeholder:text-purple-200/30 dark:focus:border-pink-400;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-extrabold text-purple-900/60 dark:text-purple-200/60;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}

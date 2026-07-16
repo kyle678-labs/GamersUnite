@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# database
+prisma/dev.db
+prisma/dev.db-journal
+
+# env
+.env
+.env.production
+
+# misc
+.DS_Store
+.claude/settings.local.json
