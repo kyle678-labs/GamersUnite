@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: ghcr.io/kyle678/gamersunite
+  IMAGE: ghcr.io/kyle678-labs/gamersunite
 
 jobs:
   build-push-notify:
